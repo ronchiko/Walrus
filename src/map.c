@@ -172,14 +172,21 @@ void Walrus_MapRemove(Walrus_Map *map, const char *key) {
 }
 
 void Walrus_MapFree(Walrus_Map *map) {
-	for(size_t i = 0; i < map->size; ++i)
+	if(!map) return;
+
+	for(size_t i = 0; i < map->size; ++i) {
 		if(map->items.heap[i].key) {
 			free(map->items.heap[i].key);
 			Walrus_FreeObject(map->items.heap[i].object);
 		}
+		map->items.heap[i].key = NULL;
+		map->items.heap[i].object = NULL;
+	}
 
 	if(map->size > PREALLOCATED_MAP_BUFFER) 
 		free(map->items.heap);
+	map->items.heap = map->items.stack;
+	map->size = PREALLOCATED_MAP_BUFFER;
 }
 
 void _DumpMap_(Walrus_Map *map) {

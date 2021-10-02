@@ -9,6 +9,7 @@ obj/
 *.o
 *.exe
 *.out
+*.stackdump
 
 # Binaries
 vwalrus
