@@ -1,0 +1,18 @@
+
+
+# Folders
+.vscode/
+obj/
+
+# Files
+*.wal
+*.o
+*.exe
+*.out
+
+# Binaries
+vwalrus
+libwalrus
+
+# vim
+*.swp
