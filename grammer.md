@@ -71,4 +71,5 @@ Get every property under user: `user.*`
 Get every string property under user: `.user.*:string`
 
 Get the first element of a list: `.user.list#0`
+
 Get all strings from a all list in an object: `.user.*:list#*:string`
