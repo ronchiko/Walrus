@@ -11,6 +11,7 @@ obj/
 *.a
 *.lib
 *.dll
+*.stackdump
 
 # Binaries
 walrus-shell

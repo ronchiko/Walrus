@@ -104,9 +104,15 @@ void ShellPerformQuery(Walrus_Stream *line, struct Walrus_ShellContext *context)
 
 void ShellLoad(const char *path, struct Walrus_ShellContext *context) {	
 	Walrus_FreeObject(context->root);
+	context->root = NULL;
 	Walrus_ErrorBuffer errors = WALRUS_EMPTY_ERROR_BUFFER;
 	Walrus_Object *object = Walrus_OpenFile(path, &errors);
 	
+	if(Walrus_HasError()) {
+		printf(ERRMSG("%s"), Walrus_GetError());
+		goto cleanup;
+	}
+
 	if(errors.size) {
 		printf("\033[31mFailed to open File '%s'\n", path);
 		for(size_t i = 0; i < errors.size; ++i)
@@ -175,7 +181,8 @@ int main(int argc, char *argv[]) {
 
 	char *lineBuffer = NULL;
 	while(true) {
-		free(lineBuffer);
+		free(lineBuffer); lineBuffer = NULL;
+		
 		printf("\033[35m%s\033[0m> ", context.file);
 		int size = 0; size_t n = 0;
 		if((size = getline(&lineBuffer, &n, stdin)) <= 0) break;

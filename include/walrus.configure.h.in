@@ -1,0 +1,4 @@
+#pragma once
+
+#define WALRUS_VERSION_MAJOR @walrus_VERSION_MAJOR@
+#define WALRUS_VERSION_MINOR @walrus_VERSION_MINOR@
