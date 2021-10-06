@@ -20,4 +20,4 @@ void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent);
 
 void Walrus_ExportObject(const char *name, Walrus_Object *object);
 
-#define WALRUS_VERSION "0.1.0"
+#include "walrus.configure.h"

@@ -141,6 +141,7 @@ struct Walrus_ShellResult HandleShellCommand(Walrus_Stream *line, struct Walrus_
 	}
 	if (!strncmp(instruction, "ROOT", INSTRUCTION_SIZE)) {
 		Walrus_Stream query;
+		
 		Walrus_StreamFromSource("''", &query);
 
 		ShellPerformQuery(&query, context);
@@ -166,7 +167,7 @@ not_a_valid_command:
 
 int main(int argc, char *argv[]) {
 	struct Walrus_ShellContext context = { NULL, NULL };
-	printf("Opening Walrus Shell, Walrus version %s\n", WALRUS_VERSION);
+	printf("Opening Walrus Shell, Walrus version %d.%d\n", WALRUS_VERSION_MAJOR, WALRUS_VERSION_MINOR);
 
 	if (argc > 1)
 		ShellLoad(argv[1], &context);

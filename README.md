@@ -10,3 +10,6 @@ For more details about the grammer & syntax of walrus files and walrus queries p
 
 To use Walrus in your project you do like any other library, link `libwalrus` with your project and use the header inside the `include` to get interface with the function.
 
+## How to build
+
+You need cmake version 3.10 or higher to build, and to build both shell and library run `cmake --build .`

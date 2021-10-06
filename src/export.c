@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 
-#include <walrus.h>
+#include "walrus.h"
 
 void Walrus_WriteLongType(FILE *stream, Walrus_Object *object) {
 	int elements = WALRUS_GET_TYPE_SIZE(object->type);
