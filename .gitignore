@@ -15,7 +15,9 @@ obj/
 
 # Binaries
 walrus-shell
+walrus-shell.*
 libwalrus
+walrus.*
 
 #cmake 
 CMakeLists.txt.user
@@ -29,6 +31,17 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+# CL
+ALL_BUILD.*
+ZERO_CHECK.*
+
+# Ninja
+lib/
+bin/
+*.ninja
+*.ninja_log
+*.ninja_deps
 
 # vim
 *.swp
