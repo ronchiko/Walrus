@@ -5,9 +5,11 @@
 #ifdef _MSC_VER
 #define Walrus_strdup(v) 		 				_strdup((v))
 #define Walrus_strncpy(d, dn, s, _max)			strncpy_s((d), (dn), (s), (_max))
+#define INLINE inline
 #else
 #define Walrus_strdup(v) 						strdup((v))
 #define Walrus_strncpy(d, dn, s, _max)			strncpy((d), (s), (_max))
+#define INLINE
 #endif 
 
 FILE *Walrus_fopen(const char *path, const char *mode);

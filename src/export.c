@@ -16,10 +16,10 @@ void Walrus_WriteLongType(FILE *stream, Walrus_Object *object) {
 	fprintf(stream, "\n");
 }
 
-inline void Walrus_IndentLine(FILE *stream, int indent, bool shorten) {
+INLINE void Walrus_IndentLine(FILE *stream, int indent, bool shorten) {
 	const char *LINE = shorten ? "  " : "\t";  
 	
-	for(;indent;--indent) fprintf(stream, LINE);
+	for(;indent;--indent) fprintf(stream, "%s", LINE);
 }
 
 void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent, bool shorten) {
