@@ -10,7 +10,7 @@
 #define INV_CONST_ERR(type, msg) \
 						Walrus_RaiseError(WALRUS_ERR_INVALID_CONSTANT);		\
 						Walrus_ErrorPushParam(0, type, false);			\
-						Walrus_ErrorPushParam(1, strndup(begin, MAX_BUFFER_SIZE), true); \
+						Walrus_ErrorPushParam(1, Walrus_strdup(begin), true); \
 						Walrus_ErrorPushParam(2, msg, false);
 
 typedef struct  {
@@ -59,7 +59,9 @@ float Walrus_ConvertToFloat(const char *buffer) {
 	const char *begin = buffer;
 
 	Walrus_BufferStack stacks[3] = {
-		[INTEGER...EXPONENT] 	= { { 0 }, 0 },
+		[INTEGER] 	= { { 0 }, 0 },
+		[FRACTION] 	= { { 0 }, 0 },
+		[EXPONENT]	= { { 0 }, 0 }
 	};
 
 	bool invertExp = false;

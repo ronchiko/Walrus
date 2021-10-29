@@ -32,7 +32,7 @@ Walrus_Type Walrus_GetTypeEnum(const char *word) {
 			bool isInt = !strncmp(word, "int", 3); 
 			if(isInt || !strncmp(word, "vec", 3)) {
 				char numberBuffer[4];
-				strncpy(numberBuffer, word + 3, 4);
+				Walrus_strncpy(numberBuffer, 4, word + 3, 4);
 				Walrus_Type numberType = Walrus_ConvertNumeric(numberBuffer, &size);
 				if (numberType != WALRUS_INTEGER)
 					goto _error;

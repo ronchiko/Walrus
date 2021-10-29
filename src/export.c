@@ -16,7 +16,13 @@ void Walrus_WriteLongType(FILE *stream, Walrus_Object *object) {
 	fprintf(stream, "\n");
 }
 
-void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent) {
+inline void Walrus_IndentLine(FILE *stream, int indent, bool shorten) {
+	const char *LINE = shorten ? "  " : "\t";  
+	
+	for(;indent;--indent) fprintf(stream, LINE);
+}
+
+void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent, bool shorten) {
 	if(!object) return;
 
 	switch (object->type)
@@ -29,13 +35,13 @@ void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent) {
 		break;
 	case WALRUS_LIST:
 		for(Walrus_Node *node = object->list.head;node;node = node->next) {
-			for(int i = 0; i < indent; i++) fprintf(stream, "\t");
+			Walrus_IndentLine(stream, indent, shorten);
 
 			fprintf(stream, "* ");
 			if((node->object->type & WALRUS_TYPE_MASK) & (WALRUS_OBJECT | WALRUS_LIST)) 
 				fprintf(stream, "\n");
 			
-			Walrus_WriteObject(stream, node->object, indent + 1);
+			Walrus_WriteObject(stream, node->object, indent + 1, shorten);
 		}
 		fprintf(stream, "\n");
 		break;
@@ -44,14 +50,14 @@ void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent) {
 			Walrus_MapItem *item = &object->map.items.heap[i];
 			
 			if(item->key) {
-				for(int i = 0; i < indent; i++) fprintf(stream, "\t");
+				Walrus_IndentLine(stream, indent, shorten);
 				fprintf(stream, "%s", item->key);
 
 				if ((item->object->type & WALRUS_TYPE_MASK) & (WALRUS_OBJECT | WALRUS_LIST)) {
 					fprintf(stream, ":\n");
 				}else fprintf(stream, " = ");
 
-				Walrus_WriteObject(stream, item->object, indent + 1);
+				Walrus_WriteObject(stream, item->object, indent + 1, shorten);
 
 			}
 			
@@ -72,9 +78,9 @@ void Walrus_WriteObject(FILE *stream, Walrus_Object *object, int indent) {
 }
 
 void Walrus_ExportObject(const char *filename, Walrus_Object *object) {
-	FILE *file = fopen(filename, "w+");
-
-	Walrus_WriteObject(file, object, 0);
+	FILE *file = Walrus_fopen(filename, "w+");
+	
+	Walrus_WriteObject(file, object, 0, false);
 
 	fclose(file);
 }

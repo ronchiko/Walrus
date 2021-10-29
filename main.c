@@ -5,6 +5,22 @@
 
 #include "walrus.h"
 
+#define HIGHLIGHT(s) "\033[34m"s"\033[0m"
+#define TITLE(s) "\033[32;1m"s"\033[0m"
+
+const char *HELP_TEXT[] = {
+	TITLE("Walrus Shell help:"),
+	"  "HIGHLIGHT("OPEN")" <filename:string> - Opens a file into the shell",
+	"",
+	"  "HIGHLIGHT("GET")" <query:string> - Perfroms a query on the open file",
+	"  "TITLE("Params")":",
+	"       "HIGHLIGHT("LIMIT")" - The maximum amount of results to show",
+	"  "HIGHLIGHT("ROOT")" Shows the data of the current file",
+	"",
+	"  "HIGHLIGHT("HELP")" - Shows help on how to use the shell",
+	"  "HIGHLIGHT("EXIT")" - Exits the terminal"
+};
+
 extern void _DumpMap_ (Walrus_Map *map)  ;
 extern void _DumpList_(Walrus_List *list);
 
@@ -17,8 +33,8 @@ struct Walrus_ShellContext {
 	char *file;
 };
 
-#define ERRMSG(msg) "\033[31m"msg"\033[0m\n"
-#define SCSMSG(msg) "\033[32m"msg"\033[0m\n"
+#define ERRMSG(msg) "\033[31m"msg"\033[0m"
+#define SCSMSG(msg) "\033[32m"msg"\033[0m"
 
 #define INSTRUCTION_SIZE	32
 
@@ -50,7 +66,7 @@ void ShellPerformQuery(Walrus_Stream *line, struct Walrus_ShellContext *context)
 	char query[1024];
 	Walrus_TokenType type = Walrus_GetAny(line, query, 1024);
 	if (type != WALRUS_TOKEN_STRING) {
-		printf(ERRMSG("Query must be given in a string format"));
+		printf(ERRMSG("Query must be given in a string format")"\n");
 		return;
 	}
 
@@ -62,23 +78,23 @@ void ShellPerformQuery(Walrus_Stream *line, struct Walrus_ShellContext *context)
 		if ((type & WALRUS_TOKEN_WORD) && !strncmp(optional, "LIMIT", 5)) {
 			type = Walrus_GetAny(line, optional, 1024);
 			if(type != WALRUS_TOKEN_NUMERIC) {
-				printf(ERRMSG("Query limit expects an integer"));
+				printf(ERRMSG("Query limit expects an integer")"\n");
 				return;
 			}
 			Walrus_Type numericType = Walrus_ConvertNumeric(optional, (void *)(uint64_t *)&limit);
 			if (numericType != WALRUS_INTEGER) {
-				printf(ERRMSG("Query limit expects an integer"));
+				printf(ERRMSG("Query limit expects an integer")"\n");
 				return;
 			}
 			continue;
 		}
 
-		printf(ERRMSG("Invalid parameter '%s' for 'GET'"), optional);
+		printf(ERRMSG("Invalid parameter '%s' for 'GET'")"\n", optional);
 		return;
 	}
 
 	if (!root) {
-		printf(ERRMSG("Root object is not specified"));
+		printf(ERRMSG("Root object is not specified")"\n");
 		return;
 	}
 
@@ -91,7 +107,12 @@ void ShellPerformQuery(Walrus_Stream *line, struct Walrus_ShellContext *context)
 		results = Walrus_Query(root, query, &resultsCount);
 	}
 
-	printf(SCSMSG("Got %ld results"), resultsCount);
+	if(Walrus_HasError()) {
+		printf(ERRMSG("Query Error:")" %s\n", Walrus_GetError());
+		return;
+	}
+
+	printf(SCSMSG("Got %zu results")"\n", resultsCount);
 	for(int i = 0; i < resultsCount; ++i) {
 		const char *typeString = PrintObjectType(results[i]);
 		Walrus_Type type = results[i]->type;
@@ -100,6 +121,8 @@ void ShellPerformQuery(Walrus_Stream *line, struct Walrus_ShellContext *context)
 			(type == WALRUS_OBJECT || type == WALRUS_LIST) ? '\n' : ' ');
 		Walrus_PrintObjectIndent(results[i], 1);
 	}
+
+	free(results);
 }
 
 void ShellLoad(const char *path, struct Walrus_ShellContext *context) {	
@@ -109,7 +132,7 @@ void ShellLoad(const char *path, struct Walrus_ShellContext *context) {
 	Walrus_Object *object = Walrus_OpenFile(path, &errors);
 	
 	if(Walrus_HasError()) {
-		printf(ERRMSG("%s"), Walrus_GetError());
+		printf(ERRMSG("%s")"\n", Walrus_GetError());
 		goto cleanup;
 	}
 
@@ -123,7 +146,7 @@ void ShellLoad(const char *path, struct Walrus_ShellContext *context) {
 	printf("\033[33mSuccessfully opened file '%s'\033[0m\n", path);
 	context->root = object;
 	free(context->file);
-	context->file = strdup(path);
+	context->file = Walrus_strdup(path);
 
 cleanup:
 	Walrus_FreeErrorBuffer(&errors);
@@ -154,11 +177,19 @@ struct Walrus_ShellResult HandleShellCommand(Walrus_Stream *line, struct Walrus_
 		return (struct Walrus_ShellResult){ .shouldQuit = false };
 	}
 
+	if(!strncmp(instruction, "HELP", INSTRUCTION_SIZE)) {
+		static size_t lines = sizeof(HELP_TEXT) / sizeof(HELP_TEXT[0]);
+
+		for(size_t i = 0; i < lines; ++i) 
+			printf("%s\n", HELP_TEXT[i]);
+		return (struct Walrus_ShellResult){ .shouldQuit = false };
+	}
+
 	if (!strncmp(instruction, "OPEN", INSTRUCTION_SIZE)) {
 		char path[512];
 		type = Walrus_GetAny(line, path, 512);
 		if (type != WALRUS_TOKEN_STRING) {
-			printf(ERRMSG("OPEN expects a string as input"));
+			printf(ERRMSG("OPEN expects a string as input")"\n");
 			return (struct Walrus_ShellResult){ .shouldQuit = false }; 
 		} 
 
@@ -167,7 +198,7 @@ struct Walrus_ShellResult HandleShellCommand(Walrus_Stream *line, struct Walrus_
 	}
 
 not_a_valid_command:
-	printf(ERRMSG("'%s' is not a command"), instruction);
+	printf(ERRMSG("'%s' is not a command")"\n", instruction);
 	return (struct Walrus_ShellResult){ .shouldQuit = false };
 }
 
@@ -183,13 +214,13 @@ int main(int argc, char *argv[]) {
 	while(true) {
 		free(lineBuffer); lineBuffer = NULL;
 		
-		printf("\033[35m%s\033[0m> ", context.file);
-		int size = 0; size_t n = 0;
-		if((size = getline(&lineBuffer, &n, stdin)) <= 0) break;
+		printf("\033[35m%s\033[0m >> ", context.file);
+		size_t size = 0, n = 0;
+		if((size = Walrus_GetLineC(&lineBuffer, &n, stdin)) <= 0) break;
 
 		Walrus_Stream line;
 		if(!Walrus_StreamFromSource(lineBuffer, &line)) {
-			printf(ERRMSG("Walrus Error Accuered: %s"), Walrus_GetError());
+			printf(ERRMSG("Walrus Error Accuered: %s")"\n", Walrus_GetError());
 			continue;
 		} 
 

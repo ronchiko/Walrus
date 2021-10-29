@@ -6,9 +6,6 @@
 #include <_query.h>
 
 
-
-
-
 bool Walrus_PerformQuery(Walrus_Object *root, Walrus_Stream *stream, Walrus_QueryContext *result) {
 	
 	char token[2];
@@ -23,7 +20,7 @@ bool Walrus_PerformQuery(Walrus_Object *root, Walrus_Stream *stream, Walrus_Quer
 
 				default:
 					Walrus_RaiseError(WALRUS_ERR_INVALID_OPERATOR);
-					Walrus_ErrorPushParam(0, strdup(token), true);
+					Walrus_ErrorPushParam(0, Walrus_strdup(token), true);
 					return false;
 			};
 			break;
@@ -31,6 +28,8 @@ bool Walrus_PerformQuery(Walrus_Object *root, Walrus_Stream *stream, Walrus_Quer
 			return Walrus_PushQueryResult(result, root);
 		default: break;
 	}
-
+	
+	Walrus_RaiseError(WALRUS_ERR_UNEXPECTED_TOKEN);
+	Walrus_ErrorPushParam(0, Walrus_strdup(token), false);
 	return false;
 }

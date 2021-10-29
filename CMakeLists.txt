@@ -4,7 +4,7 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 project(walrus VERSION 0.1 LANGUAGES C CXX)
 
 # -- Build Library --
-file(GLOB_RECURSE Sources src/*.c)
+file(GLOB_RECURSE Sources CONFIGURE_DEPENDS src/*.c)
 message(STATUS "Building Walrus ...")
 
 add_library(walrus STATIC ${Sources})

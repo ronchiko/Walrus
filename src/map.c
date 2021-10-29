@@ -5,6 +5,7 @@
 #include <walrus/parsing.h>
 #include <walrus/map.h>
 
+
 #define MAP_GROWTH_RATE(size) 	(int)((size) * 1.5f)
 #define R 						29
 
@@ -31,8 +32,8 @@ static bool Walrus_IsPrime(size_t n) {
 	return true;
 }
 
-static int around(int a, int b, int source) {
-	int value = a - b;
+static uint64_t around(uint64_t a, uint64_t b, uint64_t source) {
+	uint64_t value = a - b;
 	if (value < 0) return source + value;
 	return value;
 }
@@ -52,7 +53,7 @@ void Walrus_MapInit(Walrus_Map *map) {
 
 static bool __Walrus_MapInsertUnchecked(Walrus_MapItem *items, size_t length, const char *key, Walrus_Object *value, bool dupkey) {
 
-	char *_key = dupkey ? strdup(key) : (char *)key;
+	char *_key = dupkey ? Walrus_strdup(key) : (char *)key;
 	Walrus_MapItem current = { 0, _key, value, 1 };
 
 	const uint64_t hash = Walrus_HashString(_key, length);
@@ -69,7 +70,7 @@ static bool __Walrus_MapInsertUnchecked(Walrus_MapItem *items, size_t length, co
 		if(offset == items[currentIndex].pcl && strcmp(items[currentIndex].key, key) == 0) {
 			// Duplicate key
 			Walrus_RaiseError(WALRUS_ERR_DUPLICATE_KEY);
-			Walrus_ErrorPushParam(0, strdup(key), true);
+			Walrus_ErrorPushParam(0, Walrus_strdup(key), true);
 			return false;
 		} 
 
@@ -149,10 +150,10 @@ void Walrus_MapRemove(Walrus_Map *map, const char *key) {
 	Walrus_MapItem *remove_item = Walrus_MapProbe(map, key);
 	if (!remove_item){
 		Walrus_RaiseError(WALRUS_ERR_MISSING_KEY);
-		Walrus_ErrorPushParam(0, strdup(key), true);
+		Walrus_ErrorPushParam(0, Walrus_strdup(key), true);
 		return;
 	}
-	int position = ((char *)remove_item - (char *)map->items.heap) / sizeof(Walrus_MapItem);
+	int position = (int)(((char *)remove_item - (char *)map->items.heap) / sizeof(Walrus_MapItem));
 
 	remove_item->key = NULL;
 	remove_item->pcl = 0;
@@ -190,7 +191,7 @@ void Walrus_MapFree(Walrus_Map *map) {
 }
 
 void _DumpMap_(Walrus_Map *map) {
-	printf("Hash Map Dump, allocated = %ld, used = %ld\n", map->size, map->occopied);
+	printf("Hash Map Dump, allocated = %zu, used = %zu\n", map->size, map->occopied);
 	for(int i = 0; i < map->size; i++)
 	{
 		const Walrus_MapItem *current = map->items.heap + i;

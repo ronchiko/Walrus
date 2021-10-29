@@ -76,7 +76,7 @@ static Walrus_Object *Walrus_ParseSimple(Walrus_Stream *line, int linenum) {
 			break;
 		case WALRUS_TOKEN_STRING:
 			obj->type = WALRUS_STRING;
-			obj->string = strndup(token, MAX_TOKEN_SIZE);
+			obj->string = Walrus_strdup(token);
 			break;
 		case WALRUS_TOKEN_WORD:
 			isTrue = !strcmp(token, "true");
@@ -125,7 +125,7 @@ static Walrus_Object *Walrus_ParseComplex(Walrus_Stream *line, int linenum) {
 			Walrus_FreeObject(base);
 			Walrus_FreeObject(extend);
 			Walrus_RaiseError(WALRUS_ERR_INVALID_OPERATOR);
-			Walrus_ErrorPushParam(0, strndup(operator, 2), true);
+			Walrus_ErrorPushParam(0, Walrus_strdup(operator), true);
 			Walrus_ErrorPushParam(1, INT_2_VOIP(linenum), false);
 			return NULL;
 		}
@@ -133,7 +133,7 @@ static Walrus_Object *Walrus_ParseComplex(Walrus_Stream *line, int linenum) {
 		break;
 	default:
 		Walrus_RaiseError(WALRUS_ERR_INVALID_OPERATOR);
-		Walrus_ErrorPushParam(0, strndup(operator, 2), true);
+		Walrus_ErrorPushParam(0, Walrus_strdup(operator), true);
 		Walrus_ErrorPushParam(1, INT_2_VOIP(linenum), false);
 		Walrus_FreeObject(base);
 		return NULL;
@@ -156,7 +156,7 @@ static Walrus_Object *Walrus_ParseObject(Walrus_Stream *stream, int linenum, int
 		if (Walrus_HasError()) {
 			if (errors) {
 				errors->errors = realloc(errors->errors, ++errors->size * sizeof(char *));
-				errors->errors[errors->size - 1] = strdup(Walrus_GetError());
+				errors->errors[errors->size - 1] = Walrus_strdup(Walrus_GetError());
 			}else break;
 		}
 
@@ -169,7 +169,7 @@ static Walrus_Object *Walrus_ParseObject(Walrus_Stream *stream, int linenum, int
 				if(!Walrus_GetLine(stream, line, MAX_LINE_SIZE)) goto cleanup;
 			}
 
-			strncpy(stream_buffer, line, MAX_LINE_SIZE);
+			Walrus_strncpy(stream_buffer, MAX_LINE_SIZE, line, MAX_LINE_SIZE);
 			if(!Walrus_StreamFromSource(stream_buffer, &lineStream)) goto cleanup;
 
 			indentation = Walrus_GetIndent(&lineStream);
@@ -244,7 +244,7 @@ static Walrus_Type Walrus_ParseProperty(Walrus_Property *prop, Walrus_Stream *li
 	}
 
 	Walrus_RaiseError(WALRUS_ERR_INVALID_OPERATOR);
-	Walrus_ErrorPushParam(0, strndup(operator, 2), true);
+	Walrus_ErrorPushParam(0, Walrus_strdup(operator), true);
 	Walrus_ErrorPushParam(1, INT_2_VOIP(linenum), false);
 cleanup:
 	return WALRUS_ERROR;

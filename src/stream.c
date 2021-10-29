@@ -43,7 +43,7 @@ static char Walrus_StringStreamCurrent(Walrus_Stream *stream) {
 Walrus_Stream *Walrus_StreamFromFile(const char *path) {
 	Walrus_Stream *stream = NULL;
 
-	FILE *fstream = fopen(path, "r");
+	FILE *fstream = Walrus_fopen(path, "r");
 	if (!fstream) {
 		Walrus_RaiseError(WALRUS_ERR_INVALID_FILE);
 		Walrus_ErrorPushParam(0, (void*)path, false);
@@ -246,13 +246,15 @@ enum _Walrus_StreamInterp Walrus_GetAny(Walrus_Stream *stream, char *buffer, int
 	Walrus_ClearWhite(stream);
 
 	char current = (*stream->current)(stream);
+	if(isalpha(current)) current = 'a';
+	if(isdigit(current)) current = '0';
+
 	static struct { 
 		bool (*method)(Walrus_Stream *, char *, int);
 		enum _Walrus_StreamInterp interp;
 		} mParsingMethods[0xFF] = {
-			['0' ... '9'] = { &Walrus_GetNumeric, WALRUS_TOKEN_NUMERIC },
-			['a' ... 'z'] = { &Walrus_GetWord, WALRUS_TOKEN_WORD },
-			['A' ... 'Z'] = { &Walrus_GetWord, WALRUS_TOKEN_WORD },
+			['0'] = 		{ &Walrus_GetNumeric, WALRUS_TOKEN_NUMERIC },
+			['a'] = 		{ &Walrus_GetWord, WALRUS_TOKEN_WORD },
 			['_'] = 		{ &Walrus_GetWord, WALRUS_TOKEN_WORD },
 			['\''] = 		{ &Walrus_GetString, WALRUS_TOKEN_STRING},
 			['"'] = 		{ &Walrus_GetString, WALRUS_TOKEN_STRING},
@@ -262,6 +264,8 @@ enum _Walrus_StreamInterp Walrus_GetAny(Walrus_Stream *stream, char *buffer, int
 
 	bool result = false;
 	bool (*parser)(Walrus_Stream *, char *, int) = mParsingMethods[(int)current].method;
+	
+
 	enum _Walrus_StreamInterp interp = mParsingMethods[(int)current].interp;
 
 	if (!parser) {

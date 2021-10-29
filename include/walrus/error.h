@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <walrus/common.h>
+
 typedef enum {
 	WALRUS_ERR_INVALID_FILE,
 	WALRUS_ERR_INVALID_STREAM_TYPE,
